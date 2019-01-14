@@ -1,0 +1,18 @@
+# CafecaBackend Default Config
+
+title = "BoltCA"
+
+[base]
+folder = "BoltCA"
+debug = false
+
+[blockchain]
+type = "ethereum"
+
+[database]
+type = "firebase"
+
+[api]
+pathname = [
+  "get | /,/version | Static.Utils.readPackageInfo"
+]

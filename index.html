@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Find Cafeca</title> 
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.6.3/css/all.css" integrity="sha384-UHRtZLI+pbxtHCWp1t77Bi1L4ZtiqrqD80Kn4Z8NTSRyMA2Fd33n5dQ8lWUE00s/" crossorigin="anonymous">   
+    <link href="https://fonts.googleapis.com/css?family=Lato:100,300,300i,400,700,900" rel="stylesheet">
+    <link rel="stylesheet" href="./resources/css/style.css">
+</head>
+<body>
+    <div class="navigation">
+        <div class="navigation__logo-box">
+            <img src="./resources/img/logo.png" alt="Logo" class="navigation__logo">
+        </div>
+        <input type="checkbox" id="navi-toggle" class="navigation__checkbox">
+        <label for="navi-toggle" class="navigation__button">
+            <span class="navigation__icon">&nbsp;</span>
+        </label>
+        <!-- <div class="navigation__background">&nbsp;</div> -->
+        <nav class="navigation__nav">
+            <ul class="navigation__list">
+                <li class="navigation__item"><a href="#" class="navigation__link">About</a></li>
+                <li class="navigation__item"><a href="#" class="navigation__link">Puzzle</a></li>
+                <li class="navigation__item"><a href="#" class="navigation__link">Story</a></li>
+                <li class="navigation__item"><a href="#" class="btn btn-black">Login</a></li>
+                <li class="navigation__item"><a href="#" class="navigation__link">Ch</a></li>
+            </ul>
+        </nav>
+    </div>
+    <header class="header">
+        <div class="slideshow-container">
+            <div class="slide">
+                <img src="./resources/img/bg2.jpeg" class="slide__img" style="transform:translateY(-150px)">
+            </div>
+            <div class="slide">
+                <img src="./resources/img/bg3.jpeg" class="slide__img">
+            </div>    
+            <div class="slide">
+                <img src="./resources/img/bg4.jpeg" class="slide__img">
+            </div>
+                
+            <a class="prev" onclick="plusSlides(-1)">&#10094;</a>
+            <a class="next" onclick="plusSlides(1)">&#10095;</a>  
+
+            <div class="dot-box">
+                <span class="dot" onclick="currentSlide(1)"></span> 
+                <span class="dot" onclick="currentSlide(2)"></span> 
+                <span class="dot" onclick="currentSlide(3)"></span> 
+            </div>
+                     
+        </div>
+        <div class="header__story-box">
+            <h1 class="heading-primary">
+                <span class="heading-primary--main">
+                    <span>OUR</span> <span>STORY</span>
+                </span>
+                <span class="heading-primary--sub">
+                    這是一間虛擬的咖啡廳，在這裡你會像一般的咖啡店一樣被安排在一個座位上，可能是自己一個人坐，也可能和其他人併桌。你可以在這裡為別人點一杯咖啡、讀幾篇故事、坐下來聽聽廣播，或和其他顧客聊聊。
+                </span>
+            </h1>
+        </div>
+        <ul class="header__list">
+            <li class="navigation__item"><a href="#" class="navigation__link">Coffee</a></li>
+            <li class="navigation__item"><a href="#" class="navigation__link">Music</a></li>
+            <li class="navigation__item"><a href="#" class="navigation__link">Story</a></li>
+        </ul>
+    </header>
+    <section class="section-puzzle">
+        <div class="heading-secondary">
+            <h2>
+                <span class="heading-secondary--main">咖啡</span>
+                <span class="heading-secondary--sub"> 6 種心情 &middot; 200 個特色店家 &middot; 1200 種感動</span>
+            </h2>
+        </div>
+        <p class="paragraph">
+            苦澀（黑咖啡）、淬煉（Espresso）、戴綠帽（抹茶拿鐵）、粉紅花語（玫瑰拿鐵）、和解（榛果拿鐵）、感動（店家特調），六種口味的咖啡會作為隱藏菜單在全台灣 200 間精選的特色咖啡店內提供（限內用）。
+        </p>
+        <div class="card-box">
+            where to put the card.
+        </div>
+        <div class="card card--c1 slide-in">
+            <div class="card__side card__side--front">
+                <div class="card__picture card__picture--1">
+                    &nbsp;
+                </div>
+                <h2 class="card__heading">忌止步不前</h2>
+                <p class="card__paragraph">「你冒什麼樣的險，表明你看重什麼」</p>
+            </div>
+            <div class="card__side card__side--back">
+                
+                <img src="./resources/img/logo-white.png" alt="logo" class="card__logo">
+            </div>
+        </div>
+        <div class="card card--c2 slide-in">
+            <div class="card__side card__side--front">
+                <div class="card__picture card__picture--2">
+                    &nbsp;
+                </div>
+                <h2 class="card__heading">宜以毒攻毒</h2>
+                <p class="card__paragraph">「在孤獨中形成的事物，往往也能用來救贖孤獨」</p>
+            </div>
+            <div class="card__side card__side--back">
+                
+                <img src="./resources/img/logo-white.png" alt="logo" class="card__logo">
+            </div>
+        </div>
+        <div class="card card--c3 slide-in ">
+            <div class="card__side card__side--front ">
+                <div class="card__picture card__picture--3">
+                    &nbsp;
+                </div>
+                <h2 class="card__heading">忌左顧右盼</h2>
+                <p class="card__paragraph">「如果想征服生命中的焦慮，活在當下，活在每一個呼吸裡」</p>
+            </div>
+            <div class="card__side card__side--back ">  
+                <img src="./resources/img/logo-white.png" alt="logo" class="card__logo">
+            </div>
+        </div>
+        <div class="card__slide-hint">
+            <span class="card__slide-hint--arrow slide-up">&#x2191;</span>
+            <span class="card__slide-hint--title ">往上滑</span>
+            <!-- <span class="card__slide-hint--arrow"&#x2190;</span>
+            <span class="card__slide-hint--title">往左滑</span> -->
+
+        </div>
+    </section>
+    <section class="section-seat">
+        <div class="heading-secondary">
+            <h2>
+                <span class="heading-secondary--main">座位</span>
+                <span class="heading-secondary--sub"> 一期一會 &middot; 錯過不再 </span>
+            </h2>
+        </div>
+        <p class="paragraph">
+                進入店中會交由系統自動帶位，店內有雙人座，四人座，八人座，你不會知道即將與誰同桌，我們的營業時間為上午八點至下午八點，用餐時間為 90 分鐘，敬請把握短暫相遇的機會。每張桌子會對應一間實體店家。
+        </p>
+        <div class="arrow__box">
+            <span class="arrow__ch arrow__ch--c1">C</span>
+            <span class="arrow__ch arrow__ch--c2">A</span>
+            <span class="arrow__ch arrow__ch--c3">F</span>
+            <span class="arrow__ch arrow__ch--c4">E</span>
+            <span class="arrow__ch arrow__ch--c5">C</span>
+            <span class="arrow__ch arrow__ch--c6">A</span>
+            <span class="arrow__arrow"><i class="fas fa-angle-down"></i></span> 
+            <!-- &#x02228; &#x002C7; -->
+        </div>
+    </section>
+    <section class="section-recommand">
+        <h3 class="heading-tertiary margin-top-sm">巧克力櫻桃瑪奇亞朵</h3>
+        <div class="recommand__coffee margin-top-sm">
+            <img src="./resources/img/coffee1.jpeg" alt="latte" class="recommand__img">  
+            <p class="recommand__description">
+                沒有什麼事情是一杯咖啡無法傳達的，如果有，那就兩杯。
+            </p> 
+        </div>   
+    </section>
+    <footer class="footer">
+        <div class="row">
+            <div class="col span-1-of-2">
+                <ul class="footer-nav">
+                    <li><a href="#">About us</a></li>
+                    <li><a href="#">Coffee</a></li>
+                    <li><a href="#">Story</a></li>
+                    <li><a href="#">Music</a></li>
+                    <li><a href="#">iOS App</a></li>
+                    <li><a href="#">Android App</a></li>
+                </ul>
+            </div>
+            <div class="col span-1-of-2">
+                <ul class="social-links">
+                    <li><a href="#"><i class="fab fa-facebook-square"></i></a></li>
+                    <li><a href="#"><i class="fab fa-twitter"></i></a></li>
+                    <li><a href="#"><i class="fab fa-google-plus-g"></i></a></li>
+                    <li><a href="#"><i class="fab fa-instagram"></i></a></li>
+                </ul>
+            </div>
+        </div>
+        <div class="row">
+            <p>
+                Copyright &copy; 2018 by CAFEFA. All rights reserved.
+            </p>
+        </div>
+    </footer>
+    <script src="./resources/js/main.js"></script>
+</body>
+</html>
