@@ -9,10 +9,17 @@ debug = false
 [blockchain]
 type = "ethereum"
 
+[bolt]
+agent = "54.173.59.238"
+apiKey = "kissmyass"
+venderID = "coinprovider"
+
 [database]
 type = "firebase"
 
 [api]
 pathname = [
-  "get | /,/version | Static.Utils.readPackageInfo"
+  "get | /,/version | Static.Utils.readPackageInfo",
+  "post | /certificate | Bot.APICrawler.certificateFrom",
+  "post | /search | Bot.APICrawler.search"
 ]

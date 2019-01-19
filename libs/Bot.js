@@ -25,6 +25,29 @@ class Bot {
     return Promise.resolve(bot);
   }
 
+  readLeveldb({ key }) {
+    return new Promise((resolve, reject) => {
+      this.database.leveldb.get(key, (err, value) => {
+        if(err) {
+          resolve();
+        } else {
+          resolve(value);
+        }
+      });
+    });
+  }
+  writeLeveldb({ key, value }) {
+    return new Promise((resolve, reject) => {
+      this.database.leveldb.put(key, value, (err) => {
+        if(err) {
+          reject(err);
+        } else {
+          resolve(true);
+        }
+      });
+    });
+  }
+
   static get isBot() {
     return true;
   }
