@@ -199,6 +199,9 @@ class APICrawler extends Bot {
         metadata
       };
       return ecrequest.post(opt)
+      .then(v => new Promise((resolve, reject) => {
+        setTimeout(() => resolve(v), 100);
+      }))
       .then(v => Promise.resolve(true));
     }
 }
