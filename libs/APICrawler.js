@@ -1,9 +1,16 @@
 const path = require('path');
 const url = require('url');
 const ecrequest = require('ecrequest');
+const request = require('request');
 const dvalue = require('dvalue');
 const keccak = require('keccak');
 const Bot = require(path.resolve(__dirname, 'Bot.js'));
+
+const chunkRequest = (url) => {
+  return new Promise((resolve, reject) => {
+    request.get({ url }, (e, v) => { resolve({ data: v.body }); });
+  });
+}
 
 const jsonStableStringify = (obj, opts) => {
   if (!opts) opts = {};
@@ -102,7 +109,10 @@ class APICrawler extends Bot {
     }
 
     certificateAll() {
-      return this.certificateTidebit()
+      return Promise.all([
+        this.certificateTidebit(),
+        this.certificatePotex()
+      ])
       .then(() => {
         setTimeout(() => this.certificateAll(), this.period);
       });
@@ -120,6 +130,10 @@ class APICrawler extends Bot {
           metadata = this.formatTiDealData({ data });
           break;
         
+        case 'potex':
+          metadata = this.formatPotexData({ data });
+          break;
+        
         default:
           metadata = jsonStableStringify(data);
       }
@@ -133,7 +147,7 @@ class APICrawler extends Bot {
     formatTidebitData({ data }) {
       const tmpString = jsonStableStringify(data);
       const hash = keccak('keccak256').update(tmpString).digest('hex');
-      let result = `Tidebit|${data.reason}|${new Date(data.created_at).getTime()}|${hash}`;
+      let result = `Tidebit:${data.reason}:${new Date(data.created_at).getTime()}:${hash}`;
       return result;
     }
     crawlTidebit() {
@@ -141,25 +155,35 @@ class APICrawler extends Bot {
       return this.readLeveldb({ key: 'tidebit.opid' })
       .then((v) => {
         // fetch operation from tidebit
-        old_opid = parseInt(v) || 1;old_opid=1;
+        old_opid = parseInt(v) || 1;
         tidebit_opid = old_opid;
+        //apiurl = `https://tidebit.com/api/v2/account_version.json?account_version_id=${tidebit_opid}`;
         apiurl = `https://test.tidebit.com/api/v2/account_version.json?account_version_id=${tidebit_opid}`;
         opt = url.parse(apiurl);
-        return ecrequest.request(opt);
+        return chunkRequest(apiurl);
       })
       .then((v) => {
         // certificate to BOLT
         const opArr = JSON.parse(v.data);
-        return opArr.map((o) => {
-          tidebit_opid = o.id >= tidebit_opid ? o.id + 1 : tidebit_opid;
-          return this.certificate({
-            metadata: this.formatTidebitData({ data: o })
+        return opArr.reduce((prev, curr) => {
+          return prev.then(() => {
+            tidebit_opid = curr.id >= tidebit_opid ? curr.id + 1 : tidebit_opid;
+            return this.certificate({
+              metadata: this.formatTidebitData({ data: curr })
+            })
+            .then((v) => {
+              return new Promise((resolve, reject) => {
+                setTimeout(() => {
+                  resolve(v);
+                }, 100)
+              });
+            });
           });
-        });
+        }, Promise.resolve());
       })
       .then((v) => {
         // record opid
-        return Promise.all(v).then(() => this.writeLeveldb({ key: 'tidebit.opid', value: tidebit_opid }));
+        return this.writeLeveldb({ key: 'tidebit.opid', value: tidebit_opid });
       })
       .then((v) => {
         return Promise.resolve(true);
@@ -167,11 +191,61 @@ class APICrawler extends Bot {
     }
     /* for TideBit (E) */
 
+    /* for Potex (S) */
+    certificatePotex() {
+      return this.crawlPotex();
+    }
+    formatPotexData({ data }) {
+      const tmpString = jsonStableStringify(data);
+      const hash = keccak('keccak256').update(tmpString).digest('hex');
+      let result = `Potex:${data.reason}:${new Date(data.created_at).getTime()}:${hash}`;
+      return result;
+    }
+    crawlPotex() {
+      let potex_opid, old_opid, apiurl, opt;
+      return this.readLeveldb({ key: 'potex.opid' })
+      .then((v) => {
+        // fetch operation from potex
+        old_opid = parseInt(v) || 1;
+        potex_opid = old_opid;
+        apiurl = `https://potex.com/api/v2/account_version.json?account_version_id=${potex_opid}`;
+        opt = url.parse(apiurl);
+        return chunkRequest(apiurl);
+      })
+      .then((v) => {
+        // certificate to BOLT
+        const opArr = JSON.parse(v.data);
+        return opArr.reduce((prev, curr) => {
+          return prev.then(() => {
+            potex_opid = curr.id >= potex_opid ? curr.id + 1 : potex_opid;
+            return this.certificate({
+              metadata: this.formatPotexData({ data: curr })
+            })
+            .then((v) => {
+              return new Promise((resolve, reject) => {
+                setTimeout(() => {
+                  resolve(v);
+                }, 100)
+              });
+            });
+          });
+        }, Promise.resolve());
+      })
+      .then((v) => {
+        // record opid
+        return this.writeLeveldb({ key: 'potex.opid', value: potex_opid });
+      })
+      .then((v) => {
+        return Promise.resolve(true);
+      });
+    }
+    /* for Potex (E) */
+
     /* for TiDeal (S) */
     formatTiDealData({ data }) {
       const tmpString = jsonStableStringify(data);
       const hash = keccak('keccak256').update(tmpString).digest('hex');
-      let result = `TiDeal|record|0|${hash}`;
+      let result = `TiDeal:record:0:${hash}`;
       return result;
     }
     /* for TiDeal (E) */
@@ -199,9 +273,7 @@ class APICrawler extends Bot {
         metadata
       };
       return ecrequest.post(opt)
-      .then(v => new Promise((resolve, reject) => {
-        setTimeout(() => resolve(v), 100);
-      }))
+      .then(v => Promise.resolve(v))
       .then(v => Promise.resolve(true));
     }
 }
