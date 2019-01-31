@@ -282,6 +282,19 @@ class APICrawler extends Bot {
     .then(v => Promise.resolve(JSON.parse(v.data)));
   }
 
+  toBase64({ files }) {
+    return new Promise((resolve, reject) => {
+      fs.readFile(Object.values(files)[0].path, (e, bitmap) => {
+        const data = Buffer.from(bitmap).toString('base64');
+        return resolve({
+          result: 1,
+          message: '',
+          data 
+        });
+      });
+    });
+  }
+
   certificateFile({ files }) {
     return new Promise((resolve, reject) => {
       fs.readFile(Object.values(files)[0].path, (e, bitmap) => {

@@ -23,5 +23,6 @@ pathname = [
   "post | /certificate | Bot.APICrawler.certificateFrom",
   "post | /search | Bot.APICrawler.search",
   "post | /certificate/file | Bot.APICrawler.certificateFile",
-  "post | /search/file | Bot.APICrawler.searchFile"
+  "post | /search/file | Bot.APICrawler.searchFile",
+  "post | /base64 | Bot.APICrawler.toBase64"
 ]
