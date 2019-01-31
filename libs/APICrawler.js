@@ -105,7 +105,7 @@ class APICrawler extends Bot {
   }
 
   start() {
-    //this.certificateAll();
+    this.certificateAll();
     return super.start();
   }
 
