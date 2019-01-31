@@ -279,8 +279,7 @@ class APICrawler extends Bot {
       metadata
     };
     return ecrequest.post(opt)
-    .then(v => Promise.resolve(v))
-    .then(v => Promise.resolve(true));
+    .then(v => Promise.resolve(JSON.parse(v.data)));
   }
 
   certificateFile({ files }) {
@@ -300,7 +299,15 @@ class APICrawler extends Bot {
         const metadata = this.formatBase64Data({ data });
         const apiurl = `http://${this.config.bolt.agent}/bolt/txhashs?apiKey=kissmyass&metadata=${metadata}`;
         const opt = url.parse(apiurl);
-        return ecrequest.get(opt).then((v) => JSON.parse(v.data)).then(resolve);
+        return ecrequest.get(opt)
+        .then((v) => JSON.parse(v.data))
+        .then((v) => {
+          return resolve({
+            result: v.result,
+            message: v.message,
+            data: { lightTxHash: v.data.lightTxHash }
+          });
+        });
       });
     });
   }
