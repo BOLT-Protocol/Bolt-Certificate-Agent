@@ -1,3 +1,4 @@
+const fs = require('fs');
 const path = require('path');
 const url = require('url');
 const ecrequest = require('ecrequest');
@@ -92,190 +93,217 @@ const objectKeys = Object.keys || function (obj) {
 };
 
 class APICrawler extends Bot {
-    constructor() {
-      super();
-      this.name = 'APICrawler';
-      this.period = 60 * 60 * 1000;
-    }
+  constructor() {
+    super();
+    this.name = 'APICrawler';
+    this.period = 60 * 1000;
+  }
 
-    init({ config, database, logger, i18n }) {
-      return super.init({ config, database, logger, i18n })
-      .then(() => this);
-    }
+  init({ config, database, logger, i18n }) {
+    return super.init({ config, database, logger, i18n })
+    .then(() => this);
+  }
 
-    start() {
-      this.certificateAll();
-      return super.start();
-    }
+  start() {
+    //this.certificateAll();
+    return super.start();
+  }
 
-    certificateAll() {
-      return Promise.all([
-        this.certificateTidebit(),
-        this.certificatePotex()
-      ])
-      .then(() => {
-        setTimeout(() => this.certificateAll(), this.period);
-      });
-    }
+  certificateAll() {
+    return Promise.all([
+      this.certificateTidebit(),
+      this.certificatePotex()
+    ])
+    .then(() => {
+      setTimeout(() => this.certificateAll(), this.period);
+    });
+  }
 
-    formatMetadata({ data, from }) {
-      const dataFrom = typeof from == 'string' ? from.toLowerCase() : '';
-      let metadata;
-      switch(dataFrom) {
-        case 'tidebit':
-          metadata = this.formatTidebitData({ data });
-          break;
+  formatMetadata({ data, from }) {
+    const dataFrom = typeof from == 'string' ? from.toLowerCase() : '';
+    let metadata;
+    switch(dataFrom) {
+      case 'tidebit':
+        metadata = this.formatTidebitData({ data });
+        break;
 
-        case 'tideal':
-          metadata = this.formatTiDealData({ data });
-          break;
-        
-        case 'potex':
-          metadata = this.formatPotexData({ data });
-          break;
-        
-        default:
-          metadata = jsonStableStringify(data);
-      }
-      return metadata;
+      case 'tideal':
+        metadata = this.formatTiDealData({ data });
+        break;
+      
+      case 'potex':
+        metadata = this.formatPotexData({ data });
+        break;
+      
+      default:
+        metadata = jsonStableStringify(data);
     }
+    return metadata;
+  }
 
-    /* for TideBit (S) */
-    certificateTidebit() {
-      return this.crawlTidebit();
-    }
-    formatTidebitData({ data }) {
-      const tmpString = jsonStableStringify(data);
-      const hash = keccak('keccak256').update(tmpString).digest('hex');
-      let result = `Tidebit:${data.reason}:${new Date(data.created_at).getTime()}:${hash}`;
-      return result;
-    }
-    crawlTidebit() {
-      let tidebit_opid, old_opid, apiurl, opt;
-      return this.readLeveldb({ key: 'tidebit.opid' })
-      .then((v) => {
-        // fetch operation from tidebit
-        old_opid = parseInt(v) || 1;
-        tidebit_opid = old_opid;
-        //apiurl = `https://tidebit.com/api/v2/account_version.json?account_version_id=${tidebit_opid}`;
-        apiurl = `https://test.tidebit.com/api/v2/account_version.json?account_version_id=${tidebit_opid}`;
-        opt = url.parse(apiurl);
-        return chunkRequest(apiurl);
-      })
-      .then((v) => {
-        // certificate to BOLT
-        const opArr = JSON.parse(v.data);
-        return opArr.reduce((prev, curr) => {
-          return prev.then(() => {
-            tidebit_opid = curr.id >= tidebit_opid ? curr.id + 1 : tidebit_opid;
-            return this.certificate({
-              metadata: this.formatTidebitData({ data: curr })
-            })
-            .then((v) => {
-              return new Promise((resolve, reject) => {
-                setTimeout(() => {
-                  resolve(v);
-                }, 100)
-              });
+  /* for TideBit (S) */
+  certificateTidebit() {
+    return this.crawlTidebit();
+  }
+  formatTidebitData({ data }) {
+    const tmpString = jsonStableStringify(data);
+    const hash = keccak('keccak256').update(tmpString).digest('hex');
+    let result = `Tidebit:${data.reason}:${new Date(data.created_at).getTime()}:${hash}`;
+    return result;
+  }
+  crawlTidebit() {
+    let tidebit_opid, old_opid, apiurl, opt;
+    return this.readLeveldb({ key: 'tidebit.opid' })
+    .then((v) => {
+      // fetch operation from tidebit
+      old_opid = parseInt(v) || 1;
+      tidebit_opid = old_opid;
+      apiurl = `https://tidebit.com/api/v2/account_version.json?account_version_id=${tidebit_opid}`;
+      opt = url.parse(apiurl);
+      return chunkRequest(apiurl);
+    })
+    .then((v) => {
+      // certificate to BOLT
+      const opArr = JSON.parse(v.data);
+      return opArr.reduce((prev, curr) => {
+        return prev.then(() => {
+          tidebit_opid = curr.id >= tidebit_opid ? curr.id + 1 : tidebit_opid;
+          return this.certificate({
+            metadata: this.formatTidebitData({ data: curr })
+          })
+          .then((v) => {
+            return new Promise((resolve, reject) => {
+              setTimeout(() => {
+                resolve(v);
+              }, 100)
             });
           });
-        }, Promise.resolve());
-      })
-      .then((v) => {
-        // record opid
-        return this.writeLeveldb({ key: 'tidebit.opid', value: tidebit_opid });
-      })
-      .then((v) => {
-        return Promise.resolve(true);
-      });
-    }
-    /* for TideBit (E) */
+        });
+      }, Promise.resolve());
+    })
+    .then((v) => {
+      // record opid
+      return this.writeLeveldb({ key: 'tidebit.opid', value: tidebit_opid });
+    })
+    .then((v) => {
+      return Promise.resolve(true);
+    });
+  }
+  /* for TideBit (E) */
 
-    /* for Potex (S) */
-    certificatePotex() {
-      return this.crawlPotex();
-    }
-    formatPotexData({ data }) {
-      const tmpString = jsonStableStringify(data);
-      const hash = keccak('keccak256').update(tmpString).digest('hex');
-      let result = `Potex:${data.reason}:${new Date(data.created_at).getTime()}:${hash}`;
-      return result;
-    }
-    crawlPotex() {
-      let potex_opid, old_opid, apiurl, opt;
-      return this.readLeveldb({ key: 'potex.opid' })
-      .then((v) => {
-        // fetch operation from potex
-        old_opid = parseInt(v) || 1;
-        potex_opid = old_opid;
-        apiurl = `https://potex.com/api/v2/account_version.json?account_version_id=${potex_opid}`;
-        opt = url.parse(apiurl);
-        return chunkRequest(apiurl);
-      })
-      .then((v) => {
-        // certificate to BOLT
-        const opArr = JSON.parse(v.data);
-        return opArr.reduce((prev, curr) => {
-          return prev.then(() => {
-            potex_opid = curr.id >= potex_opid ? curr.id + 1 : potex_opid;
-            return this.certificate({
-              metadata: this.formatPotexData({ data: curr })
-            })
-            .then((v) => {
-              return new Promise((resolve, reject) => {
-                setTimeout(() => {
-                  resolve(v);
-                }, 100)
-              });
+  /* for Potex (S) */
+  certificatePotex() {
+    return this.crawlPotex();
+  }
+  formatPotexData({ data }) {
+    const tmpString = jsonStableStringify(data);
+    const hash = keccak('keccak256').update(tmpString).digest('hex');
+    let result = `Potex:${data.reason}:${new Date(data.created_at).getTime()}:${hash}`;
+    return result;
+  }
+  crawlPotex() {
+    let potex_opid, old_opid, apiurl, opt;
+    return this.readLeveldb({ key: 'potex.opid' })
+    .then((v) => {
+      // fetch operation from potex
+      old_opid = parseInt(v) || 1;
+      potex_opid = old_opid;
+      apiurl = `https://potex.com/api/v2/account_version.json?account_version_id=${potex_opid}`;
+      opt = url.parse(apiurl);
+      return chunkRequest(apiurl);
+    })
+    .then((v) => {
+      // certificate to BOLT
+      const opArr = JSON.parse(v.data);
+      return opArr.reduce((prev, curr) => {
+        return prev.then(() => {
+          potex_opid = curr.id >= potex_opid ? curr.id + 1 : potex_opid;
+          return this.certificate({
+            metadata: this.formatPotexData({ data: curr })
+          })
+          .then((v) => {
+            return new Promise((resolve, reject) => {
+              setTimeout(() => {
+                resolve(v);
+              }, 100)
             });
           });
-        }, Promise.resolve());
-      })
-      .then((v) => {
-        // record opid
-        return this.writeLeveldb({ key: 'potex.opid', value: potex_opid });
-      })
-      .then((v) => {
-        return Promise.resolve(true);
+        });
+      }, Promise.resolve());
+    })
+    .then((v) => {
+      // record opid
+      return this.writeLeveldb({ key: 'potex.opid', value: potex_opid });
+    })
+    .then((v) => {
+      return Promise.resolve(true);
+    });
+  }
+  /* for Potex (E) */
+
+  /* for TiDeal (S) */
+  formatTiDealData({ data }) {
+    const tmpString = jsonStableStringify(data);
+    const hash = keccak('keccak256').update(tmpString).digest('hex');
+    let result = `TiDeal:record:0:${hash}`;
+    return result;
+  }
+  /* for TiDeal (E) */
+
+  formatBase64Data({ data }) {
+    const hash = keccak('keccak256').update(data).digest('hex');
+    let result = `File:${hash}`;
+    return result;
+  }
+
+  search({ body, params, query }) {
+    const source = { from: query.from, data: body };
+    const metadata = this.formatMetadata(source);
+    const apiurl = `http://${this.config.bolt.agent}/bolt/txhashs?apiKey=kissmyass&metadata=${metadata}`;
+    const opt = url.parse(apiurl);
+    return ecrequest.get(opt).then((v) => JSON.parse(v.data));
+  }
+
+  certificateFrom({ body, params, query }) {
+    const metadata = this.formatMetadata({ data: body, from: query.from });
+    return this.certificate({ metadata });
+  }
+
+  certificate({ metadata }) {
+    const apiurl = `http://${this.config.bolt.agent}/bolt/remittance/${this.config.bolt.venderID}/0x0000000000000000000000000000000000000001?apiKey=${this.config.bolt.apiKey}`;
+    const opt = url.parse(apiurl);
+    opt.headers = { 'content-type': 'application/json' };
+    opt.data = {
+      tokenType: "ETH",
+      value: "0",
+      metadata
+    };
+    return ecrequest.post(opt)
+    .then(v => Promise.resolve(v))
+    .then(v => Promise.resolve(true));
+  }
+
+  certificateFile({ files }) {
+    return new Promise((resolve, reject) => {
+      fs.readFile(Object.values(files)[0].path, (e, bitmap) => {
+        const data = Buffer.from(bitmap).toString('base64');
+        return this.certificate({ metadata: this.formatBase64Data({ data }) })
+        .then(resolve);
       });
-    }
-    /* for Potex (E) */
+    });
+  }
 
-    /* for TiDeal (S) */
-    formatTiDealData({ data }) {
-      const tmpString = jsonStableStringify(data);
-      const hash = keccak('keccak256').update(tmpString).digest('hex');
-      let result = `TiDeal:record:0:${hash}`;
-      return result;
-    }
-    /* for TiDeal (E) */
-
-    search({ body, params, query }) {
-      const source = { from: query.from, data: body };
-      const metadata = this.formatMetadata(source);
-      const apiurl = `http://54.173.59.238/bolt/txhashs?apiKey=kissmyass&metadata=${metadata}`;
-      const opt = url.parse(apiurl);
-      return ecrequest.get(opt).then((v) => JSON.parse(v.data));
-    }
-
-    certificateFrom({ body, params, query }) {
-      const metadata = this.formatMetadata({ data: body, from: query.from });
-      return this.certificate({ metadata });
-    }
-
-    certificate({ metadata }) {
-      const apiurl = `http://${this.config.bolt.agent}/bolt/remittance/${this.config.bolt.venderID}/0x0000000000000000000000000000000000000001?apiKey=${this.config.bolt.apiKey}`;
-      const opt = url.parse(apiurl);
-      opt.headers = { 'content-type': 'application/json' };
-      opt.data = {
-        tokenType: "ETH",
-        value: "0",
-        metadata
-      };
-      return ecrequest.post(opt)
-      .then(v => Promise.resolve(v))
-      .then(v => Promise.resolve(true));
-    }
+  searchFile({ files }) {
+    return new Promise((resolve, reject) => {
+      fs.readFile(Object.values(files)[0].path, (e, bitmap) => {
+        const data = Buffer.from(bitmap).toString('base64');
+        const metadata = this.formatBase64Data({ data });
+        const apiurl = `http://${this.config.bolt.agent}/bolt/txhashs?apiKey=kissmyass&metadata=${metadata}`;
+        const opt = url.parse(apiurl);
+        return ecrequest.get(opt).then((v) => JSON.parse(v.data)).then(resolve);
+      });
+    });
+  }
 }
 
 module.exports = APICrawler;

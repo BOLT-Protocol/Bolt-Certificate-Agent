@@ -21,5 +21,7 @@ type = "firebase"
 pathname = [
   "get | /,/version | Static.Utils.readPackageInfo",
   "post | /certificate | Bot.APICrawler.certificateFrom",
-  "post | /search | Bot.APICrawler.search"
+  "post | /search | Bot.APICrawler.search",
+  "post | /certificate/file | Bot.APICrawler.certificateFile",
+  "post | /search/file | Bot.APICrawler.searchFile"
 ]
